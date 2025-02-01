@@ -1,0 +1,58 @@
+@import url(./dark.css);
+@import url(./list.css);
+
+@font-face {
+  font-family: JetBrainsMono;
+  src: url(../../font/JetBrainsMono.ttf);
+}
+
+body {
+  font-family: JetBrainsMono;
+
+  text-align: center;
+}
+
+header {
+  display: flex;
+  width: 100%;
+  background: #3f3f3f;
+  border-radius: 5px;
+  align-items: center;
+
+  justify-content: flex-start;
+
+  & * {
+    margin: 5px 10px;
+    font-size: 22px;
+    font-family: JetBrainsMono;
+  }
+
+  & .now {
+    background: #333;
+    color: white;
+  }
+
+  & button {
+    background: none;
+    color: #14bebe;
+    padding: 2px 5px;
+    border: none;
+    border-radius: 5px;
+
+    &:hover {
+      cursor: pointer;
+      color: #10b0b0;
+    }
+  }
+}
+
+div.article {
+  display: inline-block;
+  background-color: #333;
+  border: 2px solid black;
+  border-radius: 10px;
+  width: 50%;
+
+  margin: 2vh 5px;
+  padding: 10px;
+}
