@@ -1,39 +1,85 @@
-name: Deploy to GitHub Pages
-
+name: "Build and Deploy"
 on:
   push:
     branches:
       - main
+      - master
+    paths-ignore:
+      - .gitignore
+      - README.md
+      - LICENSE
+
+  # 允许你从 Actions 标签手动运行此工作流
+  workflow_dispatch:
+
+permissions:
+  contents: write # 修改为 write 权限
+  pages: write
+  id-token: write
+
+# 允许一个并发部署
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          node-version: "23"
+          fetch-depth: 0
 
-      - name: Install dependencies
-        run: npm install
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v4
 
-      - name: Build project
-        run: npm run build
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Build site
+        run: npm install && npm run build
+
+      - name: Upload site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "github-pages"
+          path: "dist"
+
+  deploy:
+    environment:
+      name: github-pages
+      url: https://NeoTeakTeam.github.io
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
 
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+        id: deployment
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 使用默认的GITHUB_TOKEN
-          BRANCH: gh-pages # GitHub Pages的分支
-          FOLDER: dist # 构建输出的目录
-          BUILD_DIR: . # 如果构建输出在根目录，则不需要设置
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
+      - name: Commit and Push to gh-pages
+        uses: EndBug/add-and-commit@v7
         with:
-          name: build-artifact
-          path: dist
+          author_name: GitHub Actions
+          author_email: actions@github.com
+          message: "Deploy to GitHub Pages"
+          add: "dist/**"
+          commit_files: true
+          push: true
+          push_to: "origin"
+          push_branch: "gh-pages"
